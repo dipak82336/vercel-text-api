@@ -1,13 +1,14 @@
 from http.server import BaseHTTPRequestHandler
 import json
-from vercel_kv import kv  # lowercase kv import (no need for KV())
+from vercel_kv import kv
+import os
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
-            content_length = int(self.headers['Content-Length'])
+            content_length = int(self.headers.get('Content-Length', 0))
             post_data = self.rfile.read(content_length)
-            data = json.loads(post_data)
+            data = json.loads(post_data or b'{}')
             new_text = data.get('text')
 
             if new_text is not None:
@@ -21,6 +22,6 @@ class handler(BaseHTTPRequestHandler):
             response_data = {"error": str(e)}
             self.send_response(500)
 
-        self.send_header('Content-type', 'application/json')
+        self.send_header('Content-Type', 'application/json')
         self.end_headers()
         self.wfile.write(json.dumps(response_data).encode('utf-8'))
