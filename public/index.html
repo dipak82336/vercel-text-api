@@ -21,8 +21,7 @@
             max-width: 600px;
         }
 
-        h1,
-        h2 {
+        h1, h2 {
             color: #bb86fc;
             border-bottom: 2px solid #bb86fc;
             padding-bottom: 10px;
@@ -71,7 +70,6 @@
             min-height: 20px;
             font-style: italic;
         }
-
         .status {
             margin-top: 10px;
             font-size: 14px;
@@ -101,7 +99,6 @@
     </div>
 
     <script>
-        // API URL ખાલી રાખવાથી તે આપમેળે Vercel ડોમેઈન પરથી API કોલ કરશે
         const API_URL = '';
 
         const getTextBtn = document.getElementById('getTextBtn');
@@ -110,7 +107,6 @@
         const sendTextBtn = document.getElementById('sendTextBtn');
         const sendStatus = document.getElementById('send-status');
 
-        // ફંક્શન 1: સર્વર પરથી ટેક્સ્ટ મેળવો
         async function fetchText() {
             try {
                 const response = await fetch(`${API_URL}/api/get_text`);
@@ -122,7 +118,6 @@
             }
         }
 
-        // ફંક્શન 2: સર્વર પર નવો ટેક્સ્ટ મોકલો
         async function sendText() {
             const newText = textInput.value;
             if (!newText) {
@@ -138,19 +133,17 @@
                 });
                 const data = await response.json();
                 sendStatus.textContent = data.message || `Error: ${data.error}`;
-                textInput.value = ''; // ઇનપુટ બોક્સ ખાલી કરો
-                await fetchText(); // નવો ટેક્સ્ટ તરત બતાવો
+                textInput.value = '';
+                await fetchText();
             } catch (error) {
                 sendStatus.textContent = 'Error sending text.';
                 console.error('Error:', error);
             }
         }
 
-        // બટનો પર ઇવેન્ટ લિસનર્સ ઉમેરો
         getTextBtn.addEventListener('click', fetchText);
         sendTextBtn.addEventListener('click', sendText);
 
-        // પેજ લોડ થવા પર, શરૂઆતમાં ટેક્સ્ટ લાવો
         fetchText();
     </script>
 </body>
