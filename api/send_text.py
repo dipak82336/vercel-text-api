@@ -1,28 +1,22 @@
 from http.server import BaseHTTPRequestHandler
-from vercel_kv import KV
 import json
-import os
+from vercel_kv import kv  # lowercase kv import (no need for KV())
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
-            # સાચી રીત: KV() ને કોઈ આર્ગ્યુમેન્ટની જરૂર નથી.
-            # તે આપોઆપ પાસવર્ડ શોધી લે છે.
-            kv_instance = KV()
-
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data)
             new_text = data.get('text')
-            
+
             if new_text is not None:
-                kv_instance.set("current_text", new_text)
+                kv.set("current_text", new_text)
                 response_data = {"message": "Text updated successfully!"}
                 self.send_response(200)
             else:
                 response_data = {"error": "Text not provided"}
                 self.send_response(400)
-                
         except Exception as e:
             response_data = {"error": str(e)}
             self.send_response(500)
@@ -30,4 +24,3 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.end_headers()
         self.wfile.write(json.dumps(response_data).encode('utf-8'))
-        return
