@@ -1,30 +1,32 @@
 from http.server import BaseHTTPRequestHandler
-from vercel_kv import KV  # 'kv' ને બદલે 'KV' इम्पोर्ट કરો
 import json
-import os  # 'os' લાઇબ્રેરી इम्पोर्ट કરો
+import os
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
-            # પાસવર્ડ જાતે જ os.environ માંથી લોડ કરો
-            kv = KV(
-                url=os.environ.get('KV_URL'),
-                rest_api_url=os.environ.get('KV_REST_API_URL'),
-                rest_api_token=os.environ.get('KV_REST_API_TOKEN'),
-                rest_api_read_only_token=os.environ.get('KV_REST_API_READ_ONLY_TOKEN')
-            )
-            
-            current_text = kv.get("current_text") or "Default text"
-            response_data = {"text": current_text}
-            
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(response_data).encode('utf-8'))
+            
+            # આપણે તપાસીશું કે પાસવર્ડ કોડ સુધી પહોંચી રહ્યા છે કે નહીં
+            debug_info = {
+                "MESSAGE": "This is a debug response.",
+                "ARE_WE_IN_VERCEL": "VERCEL" in os.environ,
+                "KV_URL_EXISTS": "KV_URL" in os.environ,
+                "KV_REST_API_URL_EXISTS": "KV_REST_API_URL" in os.environ,
+                "KV_REST_API_TOKEN_EXISTS": "KV_REST_API_TOKEN" in os.environ,
+                # સુરક્ષા માટે, આપણે માત્ર ટોકનની લંબાઈ તપાસીશું
+                "KV_REST_API_TOKEN_LENGTH": len(os.environ.get("KV_REST_API_TOKEN", ""))
+            }
+            
+            self.wfile.write(json.dumps(debug_info).encode('utf-8'))
+
         except Exception as e:
-            error_data = {"error": str(e)}
+            # જો અહીં પણ એરર આવે, તો તે બતાવો
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
+            error_data = {"FATAL_ERROR": str(e)}
             self.wfile.write(json.dumps(error_data).encode('utf-8'))
         return
