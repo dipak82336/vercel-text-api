@@ -1,13 +1,13 @@
 from http.server import BaseHTTPRequestHandler
-from vercel_kv import KV  # 'kv' ને બદલે 'KV' इम्पोर्ट કરો
+from vercel_kv import KV
 import json
-import os  # 'os' લાઇબ્રેરી इम्पोर्ट કરો
+import os
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             # પાસવર્ડ જાતે જ os.environ માંથી લોડ કરો
-            kv = KV(
+            kv_instance = KV(
                 url=os.environ.get('KV_URL'),
                 rest_api_url=os.environ.get('KV_REST_API_URL'),
                 rest_api_token=os.environ.get('KV_REST_API_TOKEN'),
@@ -20,7 +20,7 @@ class handler(BaseHTTPRequestHandler):
             new_text = data.get('text')
             
             if new_text is not None:
-                kv.set("current_text", new_text)
+                kv_instance.set("current_text", new_text)
                 response_data = {"message": "Text updated successfully!"}
                 self.send_response(200)
             else:
