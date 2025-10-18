@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text API Client for Vercel</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1,
+        h2 {
+            color: #bb86fc;
+            border-bottom: 2px solid #bb86fc;
+            padding-bottom: 10px;
+        }
+
+        .card {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #bb86fc;
+            color: #121212;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #a46de5;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #333;
+            color: #e0e0e0;
+            font-size: 16px;
+        }
+
+        #text-display {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            min-height: 20px;
+            font-style: italic;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Text API Interaction Page</h1>
+
+        <!-- વિભાગ 1: ટેક્સ્ટ મેળવો -->
+        <div class="card">
+            <h2>1. Get Text from Server</h2>
+            <button id="getTextBtn">Get Current Text</button>
+            <div id="text-display">Loading...</div>
+        </div>
+
+        <!-- વિભાગ 2: ટેક્સ્ટ મોકલો -->
+        <div class="card">
+            <h2>2. Send Text to Server</h2>
+            <input type="text" id="text-input" placeholder="Enter new text here...">
+            <button id="sendTextBtn">Update Text</button>
+            <div id="send-status" class="status"></div>
+        </div>
+    </div>
+
+    <script>
+        // API URL ખાલી રાખવાથી તે આપમેળે Vercel ડોમેઈન પરથી API કોલ કરશે
+        const API_URL = '';
+
+        const getTextBtn = document.getElementById('getTextBtn');
+        const textDisplay = document.getElementById('text-display');
+        const textInput = document.getElementById('text-input');
+        const sendTextBtn = document.getElementById('sendTextBtn');
+        const sendStatus = document.getElementById('send-status');
+
+        // ફંક્શન 1: સર્વર પરથી ટેક્સ્ટ મેળવો
+        async function fetchText() {
+            try {
+                const response = await fetch(`${API_URL}/api/get_text`);
+                const data = await response.json();
+                textDisplay.textContent = data.text;
+            } catch (error) {
+                textDisplay.textContent = 'Error fetching text.';
+                console.error('Error:', error);
+            }
+        }
+
+        // ફંક્શન 2: સર્વર પર નવો ટેક્સ્ટ મોકલો
+        async function sendText() {
+            const newText = textInput.value;
+            if (!newText) {
+                sendStatus.textContent = 'Please enter some text.';
+                return;
+            }
+            sendStatus.textContent = 'Sending...';
+            try {
+                const response = await fetch(`${API_URL}/api/send_text`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: newText })
+                });
+                const data = await response.json();
+                sendStatus.textContent = data.message || `Error: ${data.error}`;
+                textInput.value = ''; // ઇનપુટ બોક્સ ખાલી કરો
+                await fetchText(); // નવો ટેક્સ્ટ તરત બતાવો
+            } catch (error) {
+                sendStatus.textContent = 'Error sending text.';
+                console.error('Error:', error);
+            }
+        }
+
+        // બટનો પર ઇવેન્ટ લિસનર્સ ઉમેરો
+        getTextBtn.addEventListener('click', fetchText);
+        sendTextBtn.addEventListener('click', sendText);
+
+        // પેજ લોડ થવા પર, શરૂઆતમાં ટેક્સ્ટ લાવો
+        fetchText();
+    </script>
+</body>
+
+</html>
