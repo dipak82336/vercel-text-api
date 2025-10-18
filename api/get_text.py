@@ -5,28 +5,27 @@ import os
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
+            # ચાલો ચકાસીએ કે આપણને પાસવર્ડ મળે છે કે નહીં
+            kv_url_from_env = os.environ.get('KV_URL')
+
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            
-            # આપણે તપાસીશું કે પાસવર્ડ કોડ સુધી પહોંચી રહ્યા છે કે નહીં
-            debug_info = {
-                "MESSAGE": "This is a debug response.",
-                "ARE_WE_IN_VERCEL": "VERCEL" in os.environ,
-                "KV_URL_EXISTS": "KV_URL" in os.environ,
-                "KV_REST_API_URL_EXISTS": "KV_REST_API_URL" in os.environ,
-                "KV_REST_API_TOKEN_EXISTS": "KV_REST_API_TOKEN" in os.environ,
-                # સુરક્ષા માટે, આપણે માત્ર ટોકનની લંબાઈ તપાસીશું
-                "KV_REST_API_TOKEN_LENGTH": len(os.environ.get("KV_REST_API_TOKEN", ""))
-            }
-            
-            self.wfile.write(json.dumps(debug_info).encode('utf-8'))
 
+            if kv_url_from_env:
+                # જો પાસવર્ડ મળે, તો આ સંદેશ બતાવો
+                response_data = {"text": "SUCCESS: Environment Variable read successfully!"}
+            else:
+                # જો પાસવર્ડ ન મળે, તો આ સંદેશ બતાવો
+                response_data = {"text": "ERROR: Could NOT read Environment Variable!"}
+            
+            self.wfile.write(json.dumps(response_data).encode('utf-8'))
+        
         except Exception as e:
-            # જો અહીં પણ એરર આવે, તો તે બતાવો
+            # જો કોઈ બીજી એરર આવે, તો તે બતાવો
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            error_data = {"FATAL_ERROR": str(e)}
+            error_data = {"text": f"A server error occurred: {str(e)}"}
             self.wfile.write(json.dumps(error_data).encode('utf-8'))
         return
