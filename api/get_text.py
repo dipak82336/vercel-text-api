@@ -1,10 +1,19 @@
 from http.server import BaseHTTPRequestHandler
-from vercel_kv import kv
+from vercel_kv import KV  # 'kv' ને બદલે 'KV' इम्पोर्ट કરો
 import json
+import os  # 'os' લાઇબ્રેરી इम्पोर्ट કરો
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
+            # પાસવર્ડ જાતે જ os.environ માંથી લોડ કરો
+            kv = KV(
+                url=os.environ.get('KV_URL'),
+                rest_api_url=os.environ.get('KV_REST_API_URL'),
+                rest_api_token=os.environ.get('KV_REST_API_TOKEN'),
+                rest_api_read_only_token=os.environ.get('KV_REST_API_READ_ONLY_TOKEN')
+            )
+            
             current_text = kv.get("current_text") or "Default text"
             response_data = {"text": current_text}
             
