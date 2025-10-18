@@ -6,13 +6,9 @@ import os
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
-            # પાસવર્ડ જાતે જ os.environ માંથી લોડ કરો
-            kv_instance = KV(
-                url=os.environ.get('KV_URL'),
-                rest_api_url=os.environ.get('KV_REST_API_URL'),
-                rest_api_token=os.environ.get('KV_REST_API_TOKEN'),
-                rest_api_read_only_token=os.environ.get('KV_REST_API_READ_ONLY_TOKEN')
-            )
+            # સાચી રીત: KV() ને કોઈ આર્ગ્યુમેન્ટની જરૂર નથી.
+            # તે આપોઆપ પાસવર્ડ શોધી લે છે.
+            kv_instance = KV() 
             
             current_text = kv_instance.get("current_text") or "Default text"
             response_data = {"text": current_text}
