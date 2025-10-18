@@ -1,22 +1,22 @@
 from http.server import BaseHTTPRequestHandler
 import json
-from vercel_kv import kv  # import the ready-to-use kv object
-import os
+import traceback
+from vercel_kv import kv
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
-            # use kv.get (this will raise only when used and environment missing)
             current_text = kv.get("current_text") or "Default text"
-            response_data = {"text": current_text}
+            response = {"text": current_text}
             self.send_response(200)
-            self.send_header('Content-Type', 'application/json')
+            self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps(response_data).encode('utf-8'))
+            self.wfile.write(json.dumps(response).encode("utf-8"))
         except Exception as e:
-            # ensure we *always* return JSON on exceptions
-            error_data = {"error": str(e)}
+            # Return full traceback (for temporary debugging only)
+            tb = traceback.format_exc()
+            error_data = {"error": str(e), "traceback": tb}
             self.send_response(500)
-            self.send_header('Content-Type', 'application/json')
+            self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps(error_data).encode('utf-8'))
+            self.wfile.write(json.dumps(error_data).encode("utf-8"))
